@@ -1,98 +1,134 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useState } from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
+  const [data, setData] = useState([
+    {
+      type: "expense",
+      label: "餐饮",
+      time: "2023-12-12",
+      remark: "123",
+      role: "1",
+      amount: "12",
+    },
+  ]);
+  console.log("data", data);
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+    <SafeAreaView style={{ display: "flex", flex: 1 }}>
+      <ThemedView style={styles.headerContainer}>
+        <ThemedText style={styles.title}>记账本</ThemedText>
+        <ThemedView style={styles.balanceContainer}>
+          <ThemedText style={styles.balanceTitle}>总余额</ThemedText>
+          <ThemedText style={styles.balanceAmount}>¥0.00</ThemedText>
+          <ThemedView style={styles.incomeExpenseContainer}>
+            <ThemedText style={styles.incomeExpense}>↗ 收入 ¥0.00</ThemedText>
+            <ThemedText style={styles.incomeExpense}>↘ 支出 ¥0.00</ThemedText>
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <ScrollView style={styles.recentRecordsContainer}>
+        <ThemedText style={styles.recentRecordsTitle}>最近记录</ThemedText>
+        {data.length === 0 && (
+          <>
+            <ThemedText style={styles.noRecords}>暂无记录</ThemedText>
+            <ThemedText style={styles.addRecordHint}>
+              点击下方"记账"开始添加
+            </ThemedText>
+          </>
+        )}
+        {data.map((item, index) => (
+          <ThemedView style={styles.recordItem} key={index}>
+            <ThemedView>
+              <ThemedText>123</ThemedText>
+            </ThemedView>
+            <ThemedView style={{ flex: 1, marginLeft: 20 }}>
+              <ThemedText>{item.label}</ThemedText>
+              <ThemedText>
+                {item.role === "1" ? "男" : "女"}.{item.time}
+              </ThemedText>
+              <ThemedText>{item.remark}</ThemedText>
+            </ThemedView>
+            <ThemedView>
+              <ThemedText
+                style={{ color: item.type === "income" ? "green" : "red" }}
+              >
+                {item.type === "income" ? "+" : "-"}${item.amount}
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  headerContainer: {
+    backgroundColor: "rgb(37, 115, 249)",
+    padding: 20,
+    borderRadius: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 24,
+    color: "#fff",
+    marginBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  balanceContainer: {
+    backgroundColor: "rgba(78, 139, 251)",
+    borderRadius: 20,
+    padding: 20,
+  },
+  balanceTitle: {
+    fontSize: 16,
+    color: "#fff",
+    marginBottom: 10,
+  },
+  balanceAmount: {
+    fontSize: 32,
+    color: "#fff",
+    marginBottom: 10,
+  },
+  incomeExpenseContainer: {
+    backgroundColor: "rgba(78, 139, 251)",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  incomeExpense: {
+    fontSize: 16,
+    color: "#fff",
+  },
+  recentRecordsContainer: {
+    flex: 1,
+    padding: 20,
+    overflow: "scroll",
+  },
+  recentRecordsTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: "#000",
+  },
+  noRecords: {
+    fontSize: 16,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  addRecordHint: {
+    fontSize: 14,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  recordItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
   },
 });
