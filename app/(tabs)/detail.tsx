@@ -1,112 +1,242 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+export default function HomeScreen() {
+  const [data, setData] = useState([
+    {
+      date: "2023-12-12",
+      total: 10,
+      secData: [
+        {
+          type: "expense",
+          label: "餐饮",
+          time: "2023-12-12",
+          remark: "123",
+          role: "1",
+          amount: "12",
+        },
+        {
+          type: "expense",
+          label: "餐饮",
+          time: "2023-12-12",
+          remark: "123",
+          role: "1",
+          amount: "12",
+        },
+      ],
+    },
+    {
+      date: "2023-12-12",
+      total: 10,
+      secData: [
+        {
+          type: "expense",
+          label: "餐饮",
+          time: "2023-12-12",
+          remark: "123",
+          role: "1",
+          amount: "12",
+        },
+        {
+          type: "expense",
+          label: "餐饮",
+          time: "2023-12-12",
+          remark: "123",
+          role: "1",
+          amount: "12",
+        },
+      ],
+    },
+    {
+      date: "2023-12-12",
+      total: 10,
+      secData: [
+        {
+          type: "expense",
+          label: "餐饮",
+          time: "2023-12-12",
+          remark: "123",
+          role: "1",
+          amount: "12",
+        },
+        {
+          type: "expense",
+          label: "餐饮",
+          time: "2023-12-12",
+          remark: "123",
+          role: "1",
+          amount: "12",
+        },
+      ],
+    },
+  ]);
+  const [selectedTab, setSelectedTab] = useState("全部");
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
-
-export default function TabTwoScreen() {
+  const filteredData = data.filter((item) => {
+    if (selectedTab === "全部") return true;
+    return item.type === selectedTab.toLowerCase();
+  });
+  console.log("data", data);
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
+    <SafeAreaView style={{ display: "flex", flex: 1 }}>
+      <ThemedView style={styles.headerContainer}>
+        <ThemedText style={styles.title}>账单明细</ThemedText>
+        <ThemedView style={styles.tabContainer}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => setSelectedTab("全部")}
+          >
+            <ThemedText
+              style={[styles.tab, selectedTab === "全部" && styles.activeTab]}
+            >
+              全部
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => setSelectedTab("income")}
+          >
+            <ThemedText
+              style={[styles.tab, selectedTab === "income" && styles.activeTab]}
+            >
+              收入
+            </ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => setSelectedTab("expense")}
+          >
+            <ThemedText
+              style={[
+                styles.tab,
+                selectedTab === "expense" && styles.activeTab,
+              ]}
+            >
+              支出
+            </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      </ThemedView>
+      <ScrollView style={styles.recentRecordsContainer}>
+        {data.length === 0 && (
+          <>
+            <ThemedText style={styles.noRecords}>暂无记录</ThemedText>
+            <ThemedText style={styles.addRecordHint}>
+              点击下方"记账"开始添加
+            </ThemedText>
+          </>
+        )}
+        {data.map((item, index) => (
+          <View key={index} style={styles.recordItem}>
+            <View style={styles.recordItemTitle}>
+              <Text>{item.date}</Text>
+              <Text>${item.total}</Text>
+            </View>
+            {item.secData.map((secItem, secIndex) => (
+              <ThemedView style={styles.secRecordItem} key={secIndex}>
+                <ThemedView>
+                  <ThemedText>123</ThemedText>
+                </ThemedView>
+                <ThemedView style={{ flex: 1, marginLeft: 20 }}>
+                  <ThemedText>{secItem.label}</ThemedText>
+                  <ThemedText>
+                    {secItem.role === "1" ? "男" : "女"}.{secItem.time}
+                  </ThemedText>
+                  <ThemedText>{secItem.remark}</ThemedText>
+                </ThemedView>
+                <ThemedView>
+                  <ThemedText
+                    style={{
+                      color: secItem.type === "income" ? "green" : "red",
+                    }}
+                  >
+                    {secItem.type === "income" ? "+" : "-"}${secItem.amount}
+                  </ThemedText>
+                </ThemedView>
+              </ThemedView>
+            ))}
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  headerContainer: {
+    backgroundColor: "rgb(37, 115, 249)",
+    padding: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  title: {
+    fontSize: 24,
+    color: "#fff",
+    marginBottom: 20,
+  },
+  balanceContainer: {
+    backgroundColor: "rgba(78, 139, 251)",
+    borderRadius: 20,
+    padding: 20,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    borderRadius: 20,
+    marginBottom: 20,
+    padding: 3,
+    backgroundColor: "rgba(77, 138, 252)",
+  },
+  tab: {
+    textAlign: "center",
+    padding: 10,
+    borderRadius: 20,
+    color: "#fff",
+  },
+  activeTab: {
+    backgroundColor: "#fff",
+    color: "black",
+  },
+  recentRecordsContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  noRecords: {
+    fontSize: 16,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  addRecordHint: {
+    fontSize: 14,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  recordItem: {
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  recordItemTitle: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  secRecordItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
   },
 });
