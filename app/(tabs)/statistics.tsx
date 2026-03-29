@@ -1,16 +1,43 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Dimensions, TouchableOpacity } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PieChart } from "react-native-chart-kit";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
 export default function Statistics() {
+  const screenWidth = Dimensions.get("window").width;
+  
+  const pieData = [
+    {
+      name: "交通",
+      population: 123,
+      color: "#2573F9",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 12,
+    },
+    {
+      name: "餐饮",
+      population: 12,
+      color: "#FF3B30",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 12,
+    },
+  ];
+
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1">
       <ThemedView style={styles.headerContainer}>
         <ThemedText style={styles.title}>统计分析</ThemedText>
-        <ThemedView style={styles.balanceContainer}></ThemedView>
+        <View className="flex-row items-center justify-between mt-2">
+          <ThemedText style={styles.dateText}>2026年03月</ThemedText>
+          <TouchableOpacity>
+            <MaterialIcons name="calendar-today" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </ThemedView>
-      <ScrollView>
+      <ScrollView className="flex-1">
         <View className="flex-row p-5 rounded">
           <View className="flex-1 bg-green-400 text-white rounded-xl p-4 shadow-md mr-2">
             <Text className="text-sm text-white opacity-90">总收入</Text>
@@ -42,6 +69,28 @@ export default function Statistics() {
             </View>
             <ProgressBar progress={0.5} />
           </View>
+          
+          <View className="bg-white m-5 rounded-xl p-4 shadow-sm border border-gray-200 mb-6">
+            <ThemedText className="text-lg font-medium mb-4">支出分类统计</ThemedText>
+            <View className="flex items-center">
+              <PieChart
+                data={pieData}
+                width={screenWidth - 60}
+                height={200}
+                chartConfig={{
+                  backgroundColor: "#ffffff",
+                  backgroundGradientFrom: "#ffffff",
+                  backgroundGradientTo: "#ffffff",
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                absolute
+              />
+            </View>
+          </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -51,12 +100,14 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: "rgb(37, 115, 249)",
     padding: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
   },
   title: {
     fontSize: 24,
+    fontWeight: "bold",
     color: "#fff",
-    marginBottom: 20,
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#fff",
   },
 });

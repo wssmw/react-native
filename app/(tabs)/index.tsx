@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   },
   balanceAmount: {
     fontSize: 32,
+    lineHeight: 32,
     color: "#fff",
     marginBottom: 10,
   },

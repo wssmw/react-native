@@ -174,8 +174,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: "rgb(37, 115, 249)",
     padding: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
   },
   title: {
     fontSize: 24,
