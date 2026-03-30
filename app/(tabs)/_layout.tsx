@@ -1,12 +1,12 @@
-import { Tabs } from "expo-router";
-import React, { useState } from "react";
+import { Tabs } from 'expo-router';
+import React, { useState } from 'react';
 
-import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Login from "../login";
+import { HapticTab } from '@/components/haptic-tab';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Login from '../login';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [isLogin, setIsLogin] = useState(false);
@@ -16,7 +16,7 @@ export default function TabLayout() {
     return (
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
           headerShown: false,
           tabBarButton: HapticTab,
         }}
@@ -24,7 +24,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "首页",
+            title: '首页',
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="house.fill" color={color} />
             ),
@@ -33,36 +33,36 @@ export default function TabLayout() {
         <Tabs.Screen
           name="detail"
           options={{
-            title: "明细",
+            title: '明细',
             tabBarIcon: ({ color }) => (
-              <MaterialIcons color={color} size={28} name={"menu"} />
+              <MaterialIcons color={color} size={28} name={'menu'} />
             ),
           }}
         />
         <Tabs.Screen
           name="add"
           options={{
-            title: "记账",
+            title: '记账',
             tabBarIcon: ({ color }) => (
-              <MaterialIcons color={color} size={28} name={"add"} />
+              <MaterialIcons color={color} size={28} name={'add'} />
             ),
           }}
         />
         <Tabs.Screen
           name="statistics"
           options={{
-            title: "统计",
+            title: '统计',
             tabBarIcon: ({ color }) => (
-              <MaterialIcons color={color} size={28} name={"bar-chart"} />
+              <MaterialIcons color={color} size={28} name={'bar-chart'} />
             ),
           }}
         />
         <Tabs.Screen
           name="home"
           options={{
-            title: "我的",
+            title: '我的',
             tabBarIcon: ({ color }) => (
-              <MaterialIcons color={color} size={28} name={"person"} />
+              <MaterialIcons color={color} size={28} name={'person'} />
             ),
           }}
         />

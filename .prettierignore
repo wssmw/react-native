@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Directory for instrumented libs
+coverage
+
+# Coverage directory used by tools like istanbul
+coverage/**
+
+# Temporary folders
+tmp/**
+temp/**
+
+# Production builds
+dist/
+build/
+
+# Expo
+.expo/
+.expo-shared/
+
+# Git
+!.git
+
+# Environment
+.env*
+
+# Bundler cache
+.sass-cache
+.yarn/cache
+.yarn/unplugged
+.pnp.*
+.pnp-loader.mjs
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,10 +1,34 @@
-// https://docs.expo.dev/guides/using-eslint/
+// @ts-check
+
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
+const js = require('@eslint/js');
+const { FlatCompat } = require('@eslint/eslintrc');
+const compat = new FlatCompat();
 
 module.exports = defineConfig([
-  expoConfig,
+  js.configs.recommended,
+  ...compat.extends('prettier'),
   {
-    ignores: ['dist/*'],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: 'module',
+    },
+    rules: {
+      // 你可以在这里添加自定义规则
+    },
+  },
+  {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+    ...expoConfig,
+  },
+  {
+    ignores: [
+      'dist/**',
+      '.expo/**',
+      'node_modules/**',
+      'build/**',
+      'coverage/**',
+    ],
   },
 ]);

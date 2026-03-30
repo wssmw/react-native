@@ -1,7 +1,7 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 
 export default function Home() {
   return (
@@ -25,7 +25,9 @@ export default function Home() {
             <ThemedText className="text-lg mr-2">👥</ThemedText>
             <ThemedText className="text-base font-medium">家庭配对</ThemedText>
           </View>
-          <ThemedText className="text-sm text-gray-500 mb-4">您还未配对，请创建或加入家庭</ThemedText>
+          <ThemedText className="text-sm text-gray-500 mb-4">
+            您还未配对，请创建或加入家庭
+          </ThemedText>
           <TouchableOpacity className="bg-pink-500 rounded-lg py-3 items-center">
             <ThemedText className="text-white font-medium">立即配对</ThemedText>
           </TouchableOpacity>

@@ -1,13 +1,13 @@
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
-} from "react-native";
+} from 'react-native';
 import {
   Button,
   Card,
@@ -17,19 +17,19 @@ import {
   Provider as PaperProvider,
   Text,
   TextInput,
-} from "react-native-paper";
-import { z } from "zod";
+} from 'react-native-paper';
+import { z } from 'zod';
 
 const loginSchema = z.object({
-  email: z.string().email("请输入有效的邮箱地址"),
-  password: z.string().min(6, "密码至少需要 6 个字符"),
+  email: z.string().email('请输入有效的邮箱地址'),
+  password: z.string().min(6, '密码至少需要 6 个字符'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const colorScheme = useColorScheme();
-  const theme = colorScheme === "dark" ? MD3DarkTheme : MD3LightTheme;
+  const theme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
   const {
     control,
@@ -38,20 +38,20 @@ export default function Login() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
   const onSubmit = async (data: LoginForm) => {
-    console.log("登录数据:", data);
+    console.log('登录数据:', data);
     alert(`登录成功！\n邮箱：${data.email}`);
   };
 
   return (
     <PaperProvider theme={theme}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -125,7 +125,7 @@ export default function Login() {
 
               <Button
                 mode="outlined"
-                onPress={() => alert("注册功能")}
+                onPress={() => alert('注册功能')}
                 style={styles.button}
               >
                 注册账号
@@ -144,19 +144,19 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 16,
   },
   card: {
     borderRadius: 12,
   },
   title: {
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 8,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   subtitle: {
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 24,
     opacity: 0.7,
   },
