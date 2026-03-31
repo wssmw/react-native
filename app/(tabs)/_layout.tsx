@@ -9,7 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Login from '../login';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   if (isLogin) {
     return <Login />;
   } else {

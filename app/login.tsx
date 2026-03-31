@@ -1,8 +1,12 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { userApi } from '@/request/api';
+import { tokenManager } from '@/request/core';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -28,6 +32,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
@@ -44,8 +49,32 @@ export default function Login() {
   });
 
   const onSubmit = async (data: LoginForm) => {
-    console.log('登录数据:', data);
-    alert(`登录成功！\n邮箱：${data.email}`);
+    console.log('开始登录:', data.email);
+    try {
+      console.log('开始登录:', data.email);
+
+      // 调用登录 API
+      const response = await userApi.login(data);
+
+      console.log('登录响应:', response);
+
+      if (response.success && response.data) {
+        // 保存 token
+        await tokenManager.saveLoginTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+          user: response.data.user,
+        });
+
+        Alert.alert('登录成功', `欢迎回来，${response.data.user.name}!`);
+        console.log('登录成功，Token 已保存');
+      } else {
+        Alert.alert('登录失败', response.message || '登录失败，请检查账号密码');
+      }
+    } catch (error: any) {
+      console.error('登录失败:', error);
+      Alert.alert('登录失败', error.message || '网络错误，请稍后重试');
+    }
   };
 
   return (
@@ -125,7 +154,7 @@ export default function Login() {
 
               <Button
                 mode="outlined"
-                onPress={() => alert('注册功能')}
+                onPress={() => router.push('/register')}
                 style={styles.button}
               >
                 注册账号

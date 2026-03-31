@@ -2,40 +2,33 @@ import { http } from '../core/http';
 
 // ============== 用户相关接口 ==============
 export const userApi = {
-  // 登录
+  // 登录 - POST /api/auth/login
   login: (data: { email: string; password: string }) => {
-    return http.post<LoginResponse>('/auth/login', data);
+    return http.post<LoginResponse>('/auth/login', data, {
+      needToken: false, // 登录接口不需要 token
+    });
   },
 
-  // 注册
-  register: (data: { email: string; password: string; username?: string }) => {
-    return http.post<RegisterResponse>('/auth/register', data);
+  // 注册 - POST /api/auth/register
+  register: (data: {
+    email: string;
+    password: string;
+    name: string;
+    role: 'husband' | 'wife';
+  }) => {
+    return http.post<RegisterResponse>('/auth/register', data, {
+      needToken: false, // 注册接口不需要 token
+    });
+  },
+
+  // 获取当前用户信息 - GET /api/auth/me
+  getMe: () => {
+    return http.get<UserInfo>('/auth/me');
   },
 
   // 退出登录
   logout: () => {
     return http.post('/auth/logout');
-  },
-
-  // 获取用户信息
-  getUserInfo: () => {
-    return http.get<UserInfo>('/user/profile');
-  },
-
-  // 更新用户信息
-  updateUserInfo: (data: Partial<UserInfo>) => {
-    return http.put<UserInfo>('/user/profile', data);
-  },
-
-  // 上传头像
-  uploadAvatar: (file: File) => {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    return http.post<{ avatarUrl: string }>('/user/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
   },
 };
 
@@ -120,7 +113,11 @@ export const statisticsApi = {
   },
 
   // 获取趋势统计
-  getTrendStats: (params: { startDate: string; endDate: string; type?: 'day' | 'week' | 'month' }) => {
+  getTrendStats: (params: {
+    startDate: string;
+    endDate: string;
+    type?: 'day' | 'week' | 'month';
+  }) => {
     return http.get<TrendStats>('/statistics/trend', { params });
   },
 };
@@ -134,25 +131,51 @@ export const api = {
 };
 
 // ============== 类型定义 ==============
+// 根据后端 API 文档的响应格式
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  accessTokenExpire: number;
-  refreshTokenExpire: number;
-  userInfo: UserInfo;
+  success: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: 'husband' | 'wife';
+      coupleId?: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+  message: string;
+  timestamp: number;
 }
 
 export interface RegisterResponse {
-  userId: string;
+  success: boolean;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: 'husband' | 'wife';
+    };
+    accessToken: string;
+    refreshToken: string;
+  };
   message: string;
+  timestamp: number;
 }
 
 export interface UserInfo {
   id: string;
   email: string;
-  username: string;
+  name: string;
+  role: 'husband' | 'wife';
+  coupleId?: string;
   avatar?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Account {

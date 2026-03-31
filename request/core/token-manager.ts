@@ -89,6 +89,24 @@ class TokenManager {
   }
 
   // ============== Token 验证 ==============
+  // 保存登录返回的 token（用于首次登录）
+  async saveLoginTokens(loginResponse: {
+    accessToken: string;
+    refreshToken: string;
+    user?: UserInfo;
+  }): Promise<void> {
+    const newTokens: TokenInfo = {
+      accessToken: loginResponse.accessToken,
+      refreshToken: loginResponse.refreshToken,
+      accessTokenExpire: this.calculateExpireTime(15 * 60), // 15 分钟
+      refreshTokenExpire: this.calculateExpireTime(7 * 24 * 60 * 60), // 7 天
+      tokenType: 'Bearer',
+    };
+
+    await this.setTokens(newTokens);
+    console.log('登录 Token 已保存');
+  }
+
   isAccessTokenExpired(): boolean {
     if (!this.tokens?.accessTokenExpire) {
       return false;
@@ -141,7 +159,7 @@ class TokenManager {
           throw new Error('刷新令牌已过期，请重新登录');
         }
 
-        const response = await fetch(`${this.getBaseURL()}/auth/refresh`, {
+        const response = await fetch(`${this.getBaseURL()}/auth/refresh-access-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -162,10 +180,9 @@ class TokenManager {
           const newTokens: TokenInfo = {
             accessToken: data.data.accessToken,
             refreshToken: data.data.refreshToken || tokens.refreshToken,
-            accessTokenExpire: data.data.accessTokenExpire,
-            refreshTokenExpire:
-              data.data.refreshTokenExpire || tokens.refreshTokenExpire,
-            tokenType: data.data.tokenType || 'Bearer',
+            accessTokenExpire: this.calculateExpireTime(15 * 60),
+            refreshTokenExpire: this.calculateExpireTime(7 * 24 * 60 * 60),
+            tokenType: 'Bearer',
           };
 
           await this.setTokens(newTokens);
@@ -179,6 +196,11 @@ class TokenManager {
     })();
 
     return this.refreshPromise;
+  }
+
+  // 计算过期时间戳
+  private calculateExpireTime(seconds: number): number {
+    return Date.now() + seconds * 1000;
   }
 
   // ============== 辅助方法 ==============

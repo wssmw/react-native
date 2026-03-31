@@ -11,7 +11,7 @@ import { tokenManager } from './token-manager';
 
 // ============== 默认配置 ==============
 const DEFAULT_CONFIG: RequestConfig = {
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'http://115.190.241.111:8082/api',
   timeout: 30000,
   maxRetries: 3,
   retryDelay: 1000,
@@ -47,6 +47,7 @@ export class Request {
 
   // ============== 核心请求方法 ==============
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    console.log('开始请求:', endpoint, options);
     const requestId = this.generateRequestId();
     const abortController = new AbortController();
     this.abortControllers.set(requestId, abortController);
@@ -73,7 +74,7 @@ export class Request {
         abortController.signal,
         requestId
       );
-
+      console.log('原始响应:', response);
       const processedResponse =
         await this.executeResponseInterceptors(response);
 
@@ -103,7 +104,9 @@ export class Request {
     retryCount = 0
   ): Promise<ResponseData<T>> {
     try {
+      console.log('开始执行请求:', endpoint, config);
       const url = this.buildUrl(endpoint, config.baseURL!, config.params);
+      console.log('请求 URL:', url);
 
       if (config.needToken) {
         await this.ensureValidToken();
@@ -119,7 +122,7 @@ export class Request {
         body: config.data ? JSON.stringify(config.data) : undefined,
         signal,
       });
-
+      console.log('原始响应:', response);
       clearTimeout(timeoutId);
 
       const responseData = await this.parseResponse<T>(response);
@@ -382,6 +385,45 @@ export class Request {
     this.config = { ...this.config, ...config };
   }
 
+  // ============== 便捷请求方法 ==============
+  async get<T>(
+    endpoint: string,
+    options?: Omit<RequestOptions, 'method'>
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' });
+  }
+
+  async post<T>(
+    endpoint: string,
+    data?: any,
+    options?: Omit<RequestOptions, 'method' | 'data'>
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'POST', data });
+  }
+
+  async put<T>(
+    endpoint: string,
+    data?: any,
+    options?: Omit<RequestOptions, 'method' | 'data'>
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'PUT', data });
+  }
+
+  async patch<T>(
+    endpoint: string,
+    data?: any,
+    options?: Omit<RequestOptions, 'method' | 'data'>
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'PATCH', data });
+  }
+
+  async delete<T>(
+    endpoint: string,
+    options?: Omit<RequestOptions, 'method'>
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  }
+
   // ============== Token 管理代理 ==============
   async setToken(tokens: {
     accessToken: string;
@@ -406,3 +448,4 @@ export class Request {
 const http = new Request();
 
 export { http };
+
