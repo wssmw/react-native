@@ -88,7 +88,7 @@ export class Request {
         );
       }
 
-      return processedResponse.data as T;
+      return processedResponse as T;
     } catch (error) {
       const apiError = this.handleError(error);
       throw apiError;
@@ -126,7 +126,7 @@ export class Request {
       clearTimeout(timeoutId);
 
       const responseData = await this.parseResponse<T>(response);
-
+      console.log('解析后的响应:', responseData);
       if (this.shouldTokenRefresh(responseData)) {
         await this.handleTokenRefresh();
         if (config.needToken && retryCount < (config.retryCount || 0)) {

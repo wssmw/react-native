@@ -26,9 +26,9 @@ class TokenManager {
   // ============== Token 加载与存储 ==============
   private async loadTokens(): Promise<void> {
     try {
-      const accessToken = await storage.secure.get<string>(ACCESS_TOKEN_KEY);
-      const refreshToken = await storage.secure.get<string>(REFRESH_TOKEN_KEY);
-      const tokenInfo = await storage.secure.get<{
+      const accessToken = await storage.get<string>(ACCESS_TOKEN_KEY);
+      const refreshToken = await storage.get<string>(REFRESH_TOKEN_KEY);
+      const tokenInfo = await storage.get<{
         accessTokenExpire?: number;
         refreshTokenExpire?: number;
         tokenType?: string;
@@ -58,15 +58,15 @@ class TokenManager {
     try {
       this.tokens = tokens;
 
-      await storage.secure.set(ACCESS_TOKEN_KEY, tokens.accessToken);
-      await storage.secure.set(REFRESH_TOKEN_KEY, tokens.refreshToken);
+      await storage.set(ACCESS_TOKEN_KEY, tokens.accessToken);
+      await storage.set(REFRESH_TOKEN_KEY, tokens.refreshToken);
 
       const tokenInfo = {
         accessTokenExpire: tokens.accessTokenExpire,
         refreshTokenExpire: tokens.refreshTokenExpire,
         tokenType: tokens.tokenType,
       };
-      await storage.secure.set(TOKEN_INFO_KEY, tokenInfo);
+      await storage.set(TOKEN_INFO_KEY, tokenInfo);
 
       console.log('Token 已保存');
     } catch (error) {
@@ -78,9 +78,9 @@ class TokenManager {
   async clearTokens(): Promise<void> {
     try {
       this.tokens = null;
-      await storage.secure.remove(ACCESS_TOKEN_KEY);
-      await storage.secure.remove(REFRESH_TOKEN_KEY);
-      await storage.secure.remove(TOKEN_INFO_KEY);
+      await storage.remove(ACCESS_TOKEN_KEY);
+      await storage.remove(REFRESH_TOKEN_KEY);
+      await storage.remove(TOKEN_INFO_KEY);
       console.log('Token 已清除');
     } catch (error) {
       console.error('清除 Token 失败:', error);
@@ -159,15 +159,18 @@ class TokenManager {
           throw new Error('刷新令牌已过期，请重新登录');
         }
 
-        const response = await fetch(`${this.getBaseURL()}/auth/refresh-access-token`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            refreshToken: tokens.refreshToken,
-          }),
-        });
+        const response = await fetch(
+          `${this.getBaseURL()}/auth/refresh-access-token`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refreshToken: tokens.refreshToken,
+            }),
+          }
+        );
 
         if (!response.ok) {
           await this.clearTokens();
