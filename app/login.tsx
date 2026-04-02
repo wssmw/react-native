@@ -1,4 +1,5 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/context/auth-context';
 import { userApi } from '@/request/api';
 import { tokenManager } from '@/request/core';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +34,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const router = useRouter();
+  const { checkAuth } = useAuth();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
@@ -51,8 +53,6 @@ export default function Login() {
   const onSubmit = async (data: LoginForm) => {
     console.log('开始登录:', data.email);
     try {
-      console.log('开始登录:', data.email);
-
       // 调用登录 API
       const response = await userApi.login(data);
 
@@ -66,8 +66,11 @@ export default function Login() {
           user: response.data.user,
         });
 
-        Alert.alert('登录成功', `欢迎回来，${response.data.user.name}!`);
         console.log('登录成功，Token 已保存');
+        // 刷新 auth 状态
+        await checkAuth();
+        // 跳转到主页
+        router.replace('/(tabs)');
       } else {
         Alert.alert('登录失败', response.message || '登录失败，请检查账号密码');
       }

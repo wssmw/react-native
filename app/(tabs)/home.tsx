@@ -1,9 +1,50 @@
-import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'expo-router';
+import { userApi } from '@/request/api';
 
 export default function Home() {
+  const { logout: logoutAuth } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    Alert.alert(
+      '退出登录',
+      '确定要退出登录吗？',
+      [
+        {
+          text: '取消',
+          style: 'cancel',
+        },
+        {
+          text: '确定',
+          onPress: async () => {
+            try {
+              // 调用后端退出接口（如果有需要）
+              try {
+                await userApi.logout();
+              } catch (error) {
+                console.log('后端退出接口调用失败，但继续清除本地 token');
+              }
+              
+              // 清除本地 token
+              await logoutAuth();
+              
+              // 跳转到登录页
+              router.replace('/login');
+            } catch (error) {
+              console.error('退出登录失败:', error);
+              Alert.alert('提示', '退出失败，请重试');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView>
       <ThemedView className="bg-blue-600 py-5 px-4">
@@ -58,7 +99,10 @@ export default function Home() {
           </View>
         </View>
 
-        <TouchableOpacity className="mx-4 mt-6 border border-red-500 rounded-lg py-3 items-center">
+        <TouchableOpacity 
+          className="mx-4 mt-6 border border-red-500 rounded-lg py-3 items-center"
+          onPress={handleLogout}
+        >
           <ThemedText className="text-red-500 font-medium">退出登录</ThemedText>
         </TouchableOpacity>
 

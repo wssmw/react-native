@@ -1,4 +1,5 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/context/auth-context';
 import { tokenManager, userApi } from '@/request';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
@@ -43,6 +44,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const router = useRouter();
+  const { checkAuth } = useAuth();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
@@ -87,6 +89,11 @@ export default function Register() {
           user: response.data.user,
         });
 
+        console.log('注册成功，Token 已保存');
+        
+        // 刷新 auth 状态
+        await checkAuth();
+        
         Alert.alert(
           '注册成功',
           `欢迎加入，${data.name}！`,
@@ -94,12 +101,12 @@ export default function Register() {
             {
               text: '确定',
               onPress: () => {
-                // 注册成功后返回登录页或直接进入主页
+                // 注册成功后跳转到主页
+                router.replace('/(tabs)');
               },
             },
           ]
         );
-        console.log('注册成功，Token 已保存');
       } else {
         Alert.alert('注册失败', response.message || '注册失败，请稍后重试');
       }
