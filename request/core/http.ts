@@ -9,7 +9,8 @@ import {
 } from '../types';
 import { tokenManager } from './token-manager';
 
-// ============== 默认配置 ==============
+const LOGIN_EXPIRED_CODE = 9999;
+
 const DEFAULT_CONFIG: RequestConfig = {
   baseURL: 'http://115.190.241.111:8082/api',
   timeout: 30000,
@@ -18,7 +19,6 @@ const DEFAULT_CONFIG: RequestConfig = {
   tokenRefreshThreshold: 5 * 60 * 1000,
 };
 
-// ============== HTTP 请求类 ==============
 export class Request {
   private config: RequestConfig;
   private abortControllers: Map<string, AbortController> = new Map();
@@ -32,7 +32,6 @@ export class Request {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
-  // ============== 拦截器管理 ==============
   useRequestInterceptor(interceptor: RequestInterceptor): void {
     this.requestInterceptors.push(interceptor);
   }
@@ -45,9 +44,7 @@ export class Request {
     this.errorInterceptors.push(interceptor);
   }
 
-  // ============== 核心请求方法 ==============
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    console.log('开始请求:', endpoint, options);
     const requestId = this.generateRequestId();
     const abortController = new AbortController();
     this.abortControllers.set(requestId, abortController);
@@ -74,10 +71,8 @@ export class Request {
         abortController.signal,
         requestId
       );
-      console.log('原始响应:', response);
-      const processedResponse =
-        await this.executeResponseInterceptors(response);
 
+      const processedResponse = await this.executeResponseInterceptors(response);
       this.abortControllers.delete(requestId);
 
       if (!processedResponse.success) {
@@ -90,12 +85,10 @@ export class Request {
 
       return processedResponse as T;
     } catch (error) {
-      const apiError = this.handleError(error);
-      throw apiError;
+      throw this.handleError(error);
     }
   }
 
-  // ============== 执行请求 ==============
   private async executeRequest<T>(
     endpoint: string,
     config: RequestOptions,
@@ -104,16 +97,13 @@ export class Request {
     retryCount = 0
   ): Promise<ResponseData<T>> {
     try {
-      console.log('开始执行请求:', endpoint, config);
       const url = this.buildUrl(endpoint, config.baseURL!, config.params);
-      console.log('请求 URL:', url);
 
       if (config.needToken) {
         await this.ensureValidToken();
       }
 
       const headers = await this.buildHeaders(config);
-
       const timeoutId = this.setupTimeout(signal, config.timeout!, requestId);
 
       const response = await fetch(url, {
@@ -122,11 +112,11 @@ export class Request {
         body: config.data ? JSON.stringify(config.data) : undefined,
         signal,
       });
-      console.log('原始响应:', response);
+
       clearTimeout(timeoutId);
 
       const responseData = await this.parseResponse<T>(response);
-      console.log('解析后的响应:', responseData);
+
       if (this.shouldTokenRefresh(responseData)) {
         await this.handleTokenRefresh();
         if (config.needToken && retryCount < (config.retryCount || 0)) {
@@ -143,7 +133,7 @@ export class Request {
       if (
         config.needToken &&
         error instanceof ApiError &&
-        (error.status === 401 || error.status === 403) &&
+        error.code === LOGIN_EXPIRED_CODE &&
         retryCount < (config.retryCount || 0)
       ) {
         await this.handleTokenRefresh();
@@ -158,7 +148,6 @@ export class Request {
     }
   }
 
-  // ============== 重试机制 ==============
   private async retryRequest<T>(
     endpoint: string,
     config: RequestOptions,
@@ -201,12 +190,11 @@ export class Request {
     return baseDelay * Math.pow(2, retryCount);
   }
 
-  // ============== Token 管理 ==============
   private async ensureValidToken(): Promise<void> {
     const tokens = await tokenManager.getTokens();
 
     if (!tokens?.accessToken) {
-      throw new ApiError('未登录，请先登录', 401);
+      throw new ApiError('未登录，请先登录', LOGIN_EXPIRED_CODE);
     }
 
     if (tokenManager.isAccessTokenExpired()) {
@@ -246,10 +234,9 @@ export class Request {
   }
 
   private shouldTokenRefresh(response: ResponseData): boolean {
-    return response.code === 401 || response.code === 403;
+    return response.code === LOGIN_EXPIRED_CODE;
   }
 
-  // ============== 辅助方法 ==============
   private async executeRequestInterceptors(
     config: RequestOptions
   ): Promise<RequestOptions> {
@@ -341,7 +328,7 @@ export class Request {
       const errorData = await response.json().catch(() => ({}));
       throw new ApiError(
         errorData.message || '请求失败',
-        errorData.code || response.status,
+        errorData.code || errorData.errcode || response.status,
         errorData.data,
         response.status
       );
@@ -354,7 +341,7 @@ export class Request {
     signal: AbortSignal,
     timeout: number,
     requestId: string
-  ): NodeJS.Timeout {
+  ): ReturnType<typeof setTimeout> {
     const timeoutId = setTimeout(() => {
       if (!signal.aborted) {
         this.abortControllers.get(requestId)?.abort();
@@ -365,14 +352,13 @@ export class Request {
   }
 
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // ============== 请求管理 ==============
   cancelRequest(requestId: string): void {
     const controller = this.abortControllers.get(requestId);
     if (controller) {
@@ -386,7 +372,6 @@ export class Request {
     this.abortControllers.clear();
   }
 
-  // ============== 配置管理 ==============
   setBaseURL(baseURL: string): void {
     this.config.baseURL = baseURL;
   }
@@ -395,7 +380,6 @@ export class Request {
     this.config = { ...this.config, ...config };
   }
 
-  // ============== 便捷请求方法 ==============
   async get<T>(
     endpoint: string,
     options?: Omit<RequestOptions, 'method'>
@@ -434,7 +418,6 @@ export class Request {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 
-  // ============== Token 管理代理 ==============
   async setToken(tokens: {
     accessToken: string;
     refreshToken: string;
@@ -454,8 +437,6 @@ export class Request {
   }
 }
 
-// ============== 导出实例 ==============
 const http = new Request();
 
 export { http };
-

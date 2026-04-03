@@ -23,7 +23,7 @@ export function initRequest(config: RequestInitConfig): void {
   });
 
   http.useErrorInterceptor((error) => {
-    if (error.code === 401 || error.message?.includes('登录')) {
+    if (error.code === 9999) {
       config.onTokenExpired?.();
     }
 

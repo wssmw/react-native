@@ -150,30 +150,35 @@ export const categoryApi = {
   },
 };
 
-// ============== 统计相关接口 ==============
+// ============== 统计相关接口（对齐后端文档） ==============
 export const statisticsApi = {
-  // 获取月度统计
-  getMonthlyStats: (params: { year: number; month: number }) => {
-    return http.get<MonthlyStats>('/statistics/monthly', { params });
+  // 获取汇总统计
+  getSummary: (params: { start_date: string; end_date: string }) => {
+    return http.get<ApiResponse<SummaryStats>>('/statistics/summary', {
+      params,
+    });
   },
 
-  // 获取年度统计
-  getYearlyStats: (params: { year: number }) => {
-    return http.get<YearlyStats>('/statistics/yearly', { params });
+  // 按分类统计
+  getByCategory: (params: { start_date: string; end_date: string }) => {
+    return http.get<ApiResponse<CategoryStatisticsData>>(
+      '/statistics/by-category',
+      { params }
+    );
   },
 
-  // 获取分类统计
-  getCategoryStats: (params: { startDate: string; endDate: string }) => {
-    return http.get<CategoryStats>('/statistics/category', { params });
+  // 按人员统计
+  getByPerson: (params: { start_date: string; end_date: string }) => {
+    return http.get<ApiResponse<PersonStatisticsData>>('/statistics/by-person', {
+      params,
+    });
   },
 
-  // 获取趋势统计
-  getTrendStats: (params: {
-    startDate: string;
-    endDate: string;
-    type?: 'day' | 'week' | 'month';
-  }) => {
-    return http.get<TrendStats>('/statistics/trend', { params });
+  // 按月份统计
+  getByMonth: (params: { year: number }) => {
+    return http.get<ApiResponse<MonthStatisticsItem[]>>('/statistics/by-month', {
+      params,
+    });
   },
 };
 
@@ -353,49 +358,37 @@ export interface UpdateCategoryDTO {
   icon?: string;
 }
 
-export interface MonthlyStats {
-  year: number;
-  month: number;
+export interface SummaryStats {
   totalIncome: number;
   totalExpense: number;
   balance: number;
-  dailyAverage: number;
-  categoryStats: CategoryStatItem[];
 }
 
-export interface YearlyStats {
-  year: number;
-  totalIncome: number;
-  totalExpense: number;
-  balance: number;
-  monthlyStats: MonthlyStatItem[];
-}
-
-export interface CategoryStats {
-  categoryStats: CategoryStatItem[];
-  totalAmount: number;
-}
-
-export interface TrendStats {
-  labels: string[];
-  income: number[];
-  expense: number[];
-  balance: number[];
-}
-
-export interface CategoryStatItem {
-  categoryId: string;
-  categoryName: string;
+export interface CategoryStatisticsItem {
+  category: string;
   amount: number;
-  percentage: number;
-  icon?: string;
 }
 
-export interface MonthlyStatItem {
-  month: number;
+export interface CategoryStatisticsData {
+  expense: CategoryStatisticsItem[];
+  income: CategoryStatisticsItem[];
+}
+
+export interface PersonStatisticsDetail {
+  count: number;
+  totalIncome: number;
+  totalExpense: number;
+}
+
+export interface PersonStatisticsData {
+  husband: PersonStatisticsDetail;
+  wife: PersonStatisticsDetail;
+}
+
+export interface MonthStatisticsItem {
+  month: string;
   income: number;
   expense: number;
-  balance: number;
 }
 
 export interface PaginatedResponse<T> {
