@@ -26,7 +26,7 @@ export class Request {
   private responseInterceptors: ResponseInterceptor[] = [];
   private errorInterceptors: ErrorInterceptor[] = [];
   private isRefreshing = false;
-  private refreshSubscribers: Array<(token: string) => void> = [];
+  private refreshSubscribers: Array<() => void> = [];
 
   constructor(config?: Partial<RequestConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -140,6 +140,16 @@ export class Request {
         throw new ApiError('请求已取消', -1);
       }
 
+      if (
+        config.needToken &&
+        error instanceof ApiError &&
+        (error.status === 401 || error.status === 403) &&
+        retryCount < (config.retryCount || 0)
+      ) {
+        await this.handleTokenRefresh();
+        return this.retryRequest(endpoint, config, requestId, retryCount);
+      }
+
       if (this.shouldRetry(error, retryCount, config.retryCount || 0)) {
         return this.retryRequest(endpoint, config, requestId, retryCount);
       }
@@ -207,7 +217,7 @@ export class Request {
   private async handleTokenRefresh(): Promise<void> {
     if (this.isRefreshing) {
       return new Promise(resolve => {
-        this.refreshSubscribers.push(async (token: string) => {
+        this.refreshSubscribers.push(() => {
           resolve();
         });
       });
@@ -228,11 +238,11 @@ export class Request {
   }
 
   private notifyRefreshSubscribers(): void {
-    this.refreshSubscribers.forEach(callback => callback(''));
+    this.refreshSubscribers.forEach(callback => callback());
   }
 
   private notifyRefreshError(): void {
-    this.refreshSubscribers.forEach(callback => callback(''));
+    this.refreshSubscribers.forEach(callback => callback());
   }
 
   private shouldTokenRefresh(response: ResponseData): boolean {

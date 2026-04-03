@@ -93,7 +93,7 @@ class TokenManager {
   async saveLoginTokens(loginResponse: {
     accessToken: string;
     refreshToken: string;
-    user?: UserInfo;
+    user?: unknown;
   }): Promise<void> {
     const newTokens: TokenInfo = {
       accessToken: loginResponse.accessToken,
@@ -208,7 +208,7 @@ class TokenManager {
 
   // ============== 辅助方法 ==============
   private getBaseURL(): string {
-    return 'http://localhost:3000/api';
+    return 'http://115.190.241.111:8082/api';
   }
 
   getAccessToken(): string | null {

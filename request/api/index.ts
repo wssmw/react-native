@@ -50,6 +50,43 @@ export const coupleApi = {
   },
 };
 
+// ============== 记账记录接口（对齐后端 /records） ==============
+export const recordApi = {
+  // 创建记账记录 - POST /api/records
+  createRecord: (data: CreateRecordDTO) => {
+    return http.post<ApiResponse<RecordItem>>('/records', data);
+  },
+
+  // 获取记账记录列表 - GET /api/records
+  getRecordList: (params?: {
+    page?: number;
+    limit?: number;
+    type?: 'income' | 'expense';
+    person?: 'husband' | 'wife';
+    start_date?: string;
+    end_date?: string;
+  }) => {
+    return http.get<ApiResponse<PaginatedResponse<RecordItem>>>('/records', {
+      params,
+    });
+  },
+
+  // 获取单条记录 - GET /api/records/:id
+  getRecordDetail: (id: string) => {
+    return http.get<ApiResponse<RecordItem>>(`/records/${id}`);
+  },
+
+  // 更新记录 - PUT /api/records/:id
+  updateRecord: (id: string, data: UpdateRecordDTO) => {
+    return http.put<ApiResponse<RecordItem>>(`/records/${id}`, data);
+  },
+
+  // 删除记录 - DELETE /api/records/:id
+  deleteRecord: (id: string) => {
+    return http.delete<ApiResponse<null>>(`/records/${id}`);
+  },
+};
+
 // ============== 记账相关接口 ==============
 export const accountApi = {
   // 获取账单列表
@@ -144,6 +181,7 @@ export const statisticsApi = {
 export const api = {
   user: userApi,
   couple: coupleApi,
+  record: recordApi,
   account: accountApi,
   category: categoryApi,
   statistics: statisticsApi,
@@ -219,6 +257,51 @@ export interface UserInfo {
   avatar?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type RecordCategory =
+  | 'food'
+  | 'transport'
+  | 'shopping'
+  | 'entertainment'
+  | 'house'
+  | 'medical'
+  | 'education'
+  | 'other_expense'
+  | 'salary'
+  | 'bonus'
+  | 'investment'
+  | 'other_income';
+
+export interface RecordItem {
+  id: string;
+  amount: number;
+  type: 'income' | 'expense';
+  category: RecordCategory;
+  person: 'husband' | 'wife';
+  date: string;
+  note?: string;
+  userId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRecordDTO {
+  amount: number;
+  type: 'income' | 'expense';
+  category: RecordCategory;
+  person: 'husband' | 'wife';
+  date: string;
+  note?: string;
+}
+
+export interface UpdateRecordDTO {
+  amount?: number;
+  type?: 'income' | 'expense';
+  category?: RecordCategory;
+  person?: 'husband' | 'wife';
+  date?: string;
+  note?: string;
 }
 
 export interface Account {
