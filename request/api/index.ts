@@ -23,12 +23,30 @@ export const userApi = {
 
   // 获取当前用户信息 - GET /api/auth/me
   getMe: () => {
-    return http.get<UserInfo>('/auth/me');
+    return http.get<ApiResponse<UserInfo>>('/auth/me');
   },
 
   // 退出登录
   logout: () => {
-    return http.post('/auth/logout');
+    return http.post<ApiResponse<null>>('/auth/logout');
+  },
+};
+
+// ============== 家庭配对接口 ==============
+export const coupleApi = {
+  // 创建家庭 - POST /api/couples/create
+  create: (data: { role: 'husband' | 'wife' }) => {
+    return http.post<ApiResponse<CoupleInfo>>('/couples/create', data);
+  },
+
+  // 加入家庭 - POST /api/couples/join
+  join: (data: { inviteCode: string }) => {
+    return http.post<ApiResponse<CoupleInfo>>('/couples/join', data);
+  },
+
+  // 获取家庭信息 - GET /api/couples/info
+  getInfo: () => {
+    return http.get<ApiResponse<CoupleInfo>>('/couples/info');
   },
 };
 
@@ -125,6 +143,7 @@ export const statisticsApi = {
 // ============== 导出所有 API ==============
 export const api = {
   user: userApi,
+  couple: coupleApi,
   account: accountApi,
   category: categoryApi,
   statistics: statisticsApi,
@@ -149,6 +168,30 @@ export interface LoginResponse {
   };
   message: string;
   timestamp: number;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+  timestamp: number;
+}
+
+export interface CoupleMember {
+  id: string;
+  name: string;
+  email: string;
+  role: 'husband' | 'wife';
+}
+
+export interface CoupleInfo {
+  id: string;
+  inviteCode: string;
+  husband?: CoupleMember;
+  wife?: CoupleMember;
+  members?: CoupleMember[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface RegisterResponse {
