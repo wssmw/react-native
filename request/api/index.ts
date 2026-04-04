@@ -152,6 +152,13 @@ export const categoryApi = {
 
 // ============== 统计相关接口（对齐后端文档） ==============
 export const statisticsApi = {
+  // 获取首页概览
+  getHomeOverview: (params?: { limit?: number }) => {
+    return http.get<ApiResponse<HomeOverviewData>>('/statistics/home-overview', {
+      params,
+    });
+  },
+
   // 获取汇总统计
   getSummary: (params: { start_date: string; end_date: string }) => {
     return http.get<ApiResponse<SummaryStats>>('/statistics/summary', {
@@ -362,6 +369,13 @@ export interface SummaryStats {
   totalIncome: number;
   totalExpense: number;
   balance: number;
+}
+
+export interface HomeOverviewData {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  recentRecords: RecordItem[];
 }
 
 export interface CategoryStatisticsItem {

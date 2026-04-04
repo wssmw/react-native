@@ -1,61 +1,202 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { HomeOverviewData, RecordItem, statisticsApi } from '@/request/api';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const categoryLabelMap: Record<string, string> = {
+  food: '餐饮',
+  transport: '交通',
+  shopping: '购物',
+  entertainment: '娱乐',
+  house: '住房',
+  medical: '医疗',
+  education: '教育',
+  other_expense: '其他支出',
+  salary: '工资',
+  bonus: '奖金',
+  investment: '投资',
+  other_income: '其他收入',
+};
+
+const personLabelMap: Record<'husband' | 'wife', string> = {
+  husband: '丈夫',
+  wife: '妻子',
+};
+
+function formatAmount(amount: number) {
+  amount = Number(amount);
+  return `¥${amount.toFixed(2)}`;
+}
+
+function formatRecordDate(date: string) {
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return date;
+  }
+
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+
+  return `${month}-${day}`;
+}
+
+function getRecordCategoryLabel(category: string) {
+  return categoryLabelMap[category] || category;
+}
+
+function getRecordSign(type: RecordItem['type']) {
+  return type === 'income' ? '+' : '-';
+}
+
+function getRecordAmountColor(type: RecordItem['type']) {
+  return type === 'income' ? '#16a34a' : '#dc2626';
+}
+
 export default function HomeScreen() {
-  const [data, setData] = useState([
-    {
-      type: 'expense',
-      label: '餐饮',
-      time: '2023-12-12',
-      remark: '123',
-      role: '1',
-      amount: '12',
-    },
-  ]);
-  console.log('data', data);
+  const [overview, setOverview] = useState<HomeOverviewData>({
+    totalIncome: 0,
+    totalExpense: 0,
+    balance: 0,
+    recentRecords: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const loadOverview = useCallback(async (refreshing = false) => {
+    if (refreshing) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+
+    try {
+      const response = await statisticsApi.getHomeOverview({ limit: 10 });
+      console.log(response, 'response');
+      if (response.success) {
+        setOverview({
+          totalIncome: response.data.totalIncome ?? 0,
+          totalExpense: response.data.totalExpense ?? 0,
+          balance: response.data.balance ?? 0,
+          recentRecords: response.data.recentRecords ?? [],
+        });
+      }
+    } catch (error: any) {
+      Alert.alert('加载失败', error?.message || '首页数据加载失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadOverview();
+  }, [loadOverview]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2573F9" />
+        <ThemedText style={styles.loadingText}>首页数据加载中...</ThemedText>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={{ display: 'flex', flex: 1 }}>
+    <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.headerContainer}>
-        <ThemedText style={styles.title}>记账本</ThemedText>
+        <View style={styles.headerTitleRow}>
+          <ThemedText style={styles.title}>记账本</ThemedText>
+          <TouchableOpacity
+            onPress={() => loadOverview(true)}
+            style={styles.refreshButton}
+          >
+            <MaterialIcons name="refresh" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
         <ThemedView style={styles.balanceContainer}>
           <ThemedText style={styles.balanceTitle}>总余额</ThemedText>
-          <ThemedText style={styles.balanceAmount}>¥0.00</ThemedText>
+          <ThemedText style={styles.balanceAmount}>
+            {formatAmount(overview.balance)}
+          </ThemedText>
           <ThemedView style={styles.incomeExpenseContainer}>
-            <ThemedText style={styles.incomeExpense}>↗ 收入 ¥0.00</ThemedText>
-            <ThemedText style={styles.incomeExpense}>↘ 支出 ¥0.00</ThemedText>
+            <ThemedText style={styles.incomeExpense}>
+              ↗ 收入 {formatAmount(overview.totalIncome)}
+            </ThemedText>
+            <ThemedText style={styles.incomeExpense}>
+              ↘ 支出 {formatAmount(overview.totalExpense)}
+            </ThemedText>
           </ThemedView>
         </ThemedView>
       </ThemedView>
-      <ScrollView style={styles.recentRecordsContainer}>
+
+      <ScrollView
+        style={styles.recentRecordsContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => loadOverview(true)}
+            tintColor="#2573F9"
+          />
+        }
+      >
         <ThemedText style={styles.recentRecordsTitle}>最近记录</ThemedText>
-        {data.length === 0 && (
+
+        {overview.recentRecords.length === 0 && (
           <>
             <ThemedText style={styles.noRecords}>暂无记录</ThemedText>
             <ThemedText style={styles.addRecordHint}>
-              点击下方"记账"开始添加
+              点击下方“记账”开始添加
             </ThemedText>
           </>
         )}
-        {data.map((item, index) => (
-          <ThemedView style={styles.recordItem} key={index}>
-            <ThemedView>
-              <ThemedText>123</ThemedText>
-            </ThemedView>
-            <ThemedView style={{ flex: 1, marginLeft: 20 }}>
-              <ThemedText>{item.label}</ThemedText>
-              <ThemedText>
-                {item.role === '1' ? '男' : '女'}.{item.time}
+
+        {overview.recentRecords.map(item => (
+          <ThemedView style={styles.recordItem} key={item.id}>
+            <View style={styles.recordIconBox}>
+              <ThemedText style={styles.recordIconText}>
+                {item.type === 'income' ? '入' : '支'}
               </ThemedText>
-              <ThemedText>{item.remark}</ThemedText>
-            </ThemedView>
-            <ThemedView>
-              <ThemedText
-                style={{ color: item.type === 'income' ? 'green' : 'red' }}
-              >
-                {item.type === 'income' ? '+' : '-'}${item.amount}
-              </ThemedText>
+            </View>
+
+            <ThemedView style={styles.recordContent}>
+              <View style={styles.recordMainRow}>
+                <ThemedText style={styles.recordLabel}>
+                  {getRecordCategoryLabel(item.category)}
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    styles.recordAmount,
+                    { color: getRecordAmountColor(item.type) },
+                  ]}
+                >
+                  {getRecordSign(item.type)}
+                  {formatAmount(item.amount)}
+                </ThemedText>
+              </View>
+
+              <View style={styles.recordMetaRow}>
+                <ThemedText style={styles.recordMeta}>
+                  {personLabelMap[item.person]} · {formatRecordDate(item.date)}
+                </ThemedText>
+                {!!item.note && (
+                  <ThemedText style={styles.recordNote} numberOfLines={1}>
+                    {item.note}
+                  </ThemedText>
+                )}
+              </View>
             </ThemedView>
           </ThemedView>
         ))}
@@ -65,52 +206,81 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#6b7280',
+  },
   headerContainer: {
     backgroundColor: 'rgb(37, 115, 249)',
     padding: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
   title: {
     fontSize: 24,
     color: '#fff',
-    marginBottom: 20,
+    fontWeight: '700',
+  },
+  refreshButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   balanceContainer: {
-    backgroundColor: 'rgba(78, 139, 251)',
+    backgroundColor: 'rgba(78, 139, 251, 0.95)',
     borderRadius: 20,
     padding: 20,
   },
   balanceTitle: {
     fontSize: 16,
-    color: '#fff',
+    color: '#dbeafe',
     marginBottom: 10,
   },
   balanceAmount: {
     fontSize: 32,
-    lineHeight: 32,
+    lineHeight: 36,
     color: '#fff',
-    marginBottom: 10,
+    marginBottom: 14,
+    fontWeight: '700',
   },
   incomeExpenseContainer: {
-    backgroundColor: 'rgba(78, 139, 251)',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    gap: 12,
+    backgroundColor: 'transparent',
   },
   incomeExpense: {
-    fontSize: 16,
-    color: '#fff',
+    flex: 1,
+    fontSize: 15,
+    color: '#eff6ff',
   },
   recentRecordsContainer: {
     flex: 1,
     padding: 20,
-    overflow: 'scroll',
   },
   recentRecordsTitle: {
     fontSize: 18,
-    marginBottom: 10,
-    color: '#000',
+    marginBottom: 14,
+    color: '#111827',
+    fontWeight: '700',
   },
   noRecords: {
     fontSize: 16,
@@ -126,11 +296,63 @@ const styles = StyleSheet.create({
   },
   recordItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#fff',
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+    borderRadius: 14,
+    marginBottom: 12,
+    shadowColor: '#0f172a',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
+  recordIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  recordIconText: {
+    color: '#1d4ed8',
+    fontWeight: '700',
+  },
+  recordContent: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  recordMainRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  recordLabel: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '600',
+  },
+  recordAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  recordMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  recordMeta: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  recordNote: {
+    flex: 1,
+    fontSize: 13,
+    color: '#9ca3af',
+    textAlign: 'right',
   },
 });
