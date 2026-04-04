@@ -3,7 +3,6 @@ import { useAuth } from '@/context/auth-context';
 import { tokenManager, userApi } from '@/request';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
@@ -31,11 +30,9 @@ const registerSchema = z
     password: z.string().min(6, '密码至少需要 6 个字符'),
     confirmPassword: z.string().min(6, '请确认密码'),
     name: z.string().min(2, '昵称至少需要 2 个字符'),
-    role: z.enum(['husband', 'wife'], {
-      errorMap: () => ({ message: '请选择角色' }),
-    }),
+    role: z.enum(['husband', 'wife'], '请选择角色'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: '两次输入的密码不一致',
     path: ['confirmPassword'],
   });
@@ -44,7 +41,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const router = useRouter();
-  const { checkAuth } = useAuth();
+  const { login } = useAuth();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
@@ -71,7 +68,6 @@ export default function Register() {
     try {
       console.log('开始注册:', data.email);
 
-      // 调用注册 API
       const response = await userApi.register({
         email: data.email,
         password: data.password,
@@ -82,31 +78,30 @@ export default function Register() {
       console.log('注册响应:', response);
 
       if (response.success && response.data) {
-        // 保存 token
         await tokenManager.saveLoginTokens({
           accessToken: response.data.accessToken,
           refreshToken: response.data.refreshToken,
           user: response.data.user,
         });
 
+        login({
+          ...response.data.user,
+          coupleId: response.data.user.coupleId,
+          avatar: response.data.user.avatar,
+          createdAt: response.data.user.createdAt || new Date().toISOString(),
+          updatedAt: response.data.user.updatedAt || new Date().toISOString(),
+        });
+
         console.log('注册成功，Token 已保存');
-        
-        // 刷新 auth 状态
-        await checkAuth();
-        
-        Alert.alert(
-          '注册成功',
-          `欢迎加入，${data.name}！`,
-          [
-            {
-              text: '确定',
-              onPress: () => {
-                // 注册成功后跳转到主页
-                router.replace('/(tabs)');
-              },
+
+        Alert.alert('注册成功', `欢迎加入，${data.name}！`, [
+          {
+            text: '确定',
+            onPress: () => {
+              router.replace('/(tabs)');
             },
-          ]
-        );
+          },
+        ]);
       } else {
         Alert.alert('注册失败', response.message || '注册失败，请稍后重试');
       }
@@ -132,7 +127,6 @@ export default function Register() {
                 开启你们的记账之旅
               </Text>
 
-              {/* 昵称 */}
               <Controller
                 control={control}
                 name="name"
@@ -156,7 +150,6 @@ export default function Register() {
                 )}
               />
 
-              {/* 邮箱 */}
               <Controller
                 control={control}
                 name="email"
@@ -182,7 +175,6 @@ export default function Register() {
                 )}
               />
 
-              {/* 密码 */}
               <Controller
                 control={control}
                 name="password"
@@ -207,7 +199,6 @@ export default function Register() {
                 )}
               />
 
-              {/* 确认密码 */}
               <Controller
                 control={control}
                 name="confirmPassword"
@@ -232,7 +223,6 @@ export default function Register() {
                 )}
               />
 
-              {/* 角色选择 */}
               <Controller
                 control={control}
                 name="role"
@@ -242,7 +232,7 @@ export default function Register() {
                       选择你的角色
                     </Text>
                     <RadioButton.Group
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         setValue('role', value as 'husband' | 'wife');
                         onChange(value);
                       }}
@@ -275,7 +265,7 @@ export default function Register() {
                 onPress={() => router.back()}
                 style={styles.button}
               >
-                已有账号？去登录
+                返回登录
               </Button>
             </Card.Content>
           </Card>
@@ -311,8 +301,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   roleLabel: {
-    marginBottom: 8,
-    fontWeight: '500',
+    marginTop: 8,
+    marginBottom: 4,
   },
   button: {
     marginTop: 8,

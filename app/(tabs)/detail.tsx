@@ -1,10 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import {
-  GroupedRecordItem,
-  RecordItem,
-  recordApi,
-} from '@/request/api';
+import { GroupedRecordItem, RecordItem, recordApi } from '@/request/api';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -342,7 +338,7 @@ const styles = StyleSheet.create({
   },
   recentRecordsContainer: {
     flex: 1,
-    padding: 20,
+    padding: 16,
   },
   noRecords: {
     fontSize: 16,

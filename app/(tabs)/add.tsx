@@ -1,4 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
+import { useAuth } from '@/context/auth-context';
 import { recordApi, RecordCategory } from '@/request/api';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,6 +54,7 @@ const incomeCategories = [
 
 export default function AddRecord() {
   const router = useRouter();
+  const { user } = useAuth();
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const {
@@ -67,7 +69,7 @@ export default function AddRecord() {
       type: 'expense',
       amount: '',
       category: 'food',
-      person: 'husband',
+      person: user?.role || 'husband',
       date: new Date(),
       note: '',
     },
@@ -88,6 +90,12 @@ export default function AddRecord() {
       setValue('category', currentCategories[0].id, { shouldValidate: true });
     }
   }, [currentCategories, selectedCategory, setValue]);
+
+  useEffect(() => {
+    if (user?.role) {
+      setValue('person', user.role, { shouldValidate: true });
+    }
+  }, [user?.role, setValue]);
 
   const displayDate = useMemo(() => {
     const year = dateObj.getFullYear();

@@ -39,6 +39,10 @@ export default function Home() {
   const members = useMemo(() => {
     if (!coupleInfo) return [];
 
+    if (coupleInfo.users && coupleInfo.users.length > 0) {
+      return coupleInfo.users;
+    }
+
     if (coupleInfo.members && coupleInfo.members.length > 0) {
       return coupleInfo.members;
     }
@@ -193,7 +197,9 @@ export default function Home() {
           {coupleInfo ? (
             <>
               <View className="bg-blue-50 rounded-lg px-3 py-2 mb-3">
-                <ThemedText className="text-sm text-blue-600">邀请码</ThemedText>
+                <ThemedText className="text-sm text-blue-600">
+                  邀请码
+                </ThemedText>
                 <View className="flex-row items-center justify-between mt-1">
                   <ThemedText className="text-xl font-bold text-blue-700">
                     {coupleInfo.inviteCode || '--'}
@@ -207,16 +213,23 @@ export default function Home() {
                 </View>
               </View>
 
-              <ThemedText className="text-sm text-gray-500 mb-2">家庭成员</ThemedText>
+              <ThemedText className="text-sm text-gray-500 mb-2">
+                家庭成员
+              </ThemedText>
               {members.length > 0 ? (
                 members.map(member => (
                   <View
                     key={member.id}
                     className="flex-row items-center justify-between border border-gray-200 rounded-lg px-3 py-2 mb-2"
                   >
-                    <ThemedText className="text-sm text-gray-800">
-                      {member.name}
-                    </ThemedText>
+                    <View>
+                      <ThemedText className="text-sm text-gray-800">
+                        {member.name}
+                      </ThemedText>
+                      <ThemedText className="text-xs text-gray-400">
+                        {member.email}
+                      </ThemedText>
+                    </View>
                     <ThemedText className="text-sm text-gray-500">
                       {roleTextMap[member.role]}
                     </ThemedText>
@@ -272,9 +285,14 @@ export default function Home() {
           </View>
 
           <View className="border-b border-gray-200 py-3">
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between items-center gap-3">
               <ThemedText className="text-sm text-gray-500">用户ID</ThemedText>
-              <ThemedText className="text-sm">{user?.id || '--'}</ThemedText>
+              <ThemedText
+                className="text-sm flex-1 text-right"
+                numberOfLines={1}
+              >
+                {user?.id || '--'}
+              </ThemedText>
             </View>
           </View>
 
@@ -288,9 +306,14 @@ export default function Home() {
           </View>
 
           <View className="py-3">
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between items-center gap-3">
               <ThemedText className="text-sm text-gray-500">家庭ID</ThemedText>
-              <ThemedText className="text-sm">{coupleInfo?.id || '未配对'}</ThemedText>
+              <ThemedText
+                className="text-sm flex-1 text-right"
+                numberOfLines={1}
+              >
+                {coupleInfo?.id || '未配对'}
+              </ThemedText>
             </View>
           </View>
         </View>

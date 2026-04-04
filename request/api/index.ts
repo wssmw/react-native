@@ -171,12 +171,9 @@ export const categoryApi = {
 export const statisticsApi = {
   // 获取首页概览
   getHomeOverview: (params?: { limit?: number }) => {
-    return http.get<ApiResponse<HomeOverviewData>>(
-      '/statistics/home-overview',
-      {
-        params,
-      }
-    );
+    return http.get<ApiResponse<HomeOverviewData>>('/statistics/home-overview', {
+      params,
+    });
   },
 
   // 获取汇总统计
@@ -190,18 +187,17 @@ export const statisticsApi = {
   getByCategory: (params: { start_date: string; end_date: string }) => {
     return http.get<ApiResponse<CategoryStatisticsData>>(
       '/statistics/by-category',
-      { params }
+      {
+        params,
+      }
     );
   },
 
   // 按人员统计
   getByPerson: (params: { start_date: string; end_date: string }) => {
-    return http.get<ApiResponse<PersonStatisticsData>>(
-      '/statistics/by-person',
-      {
-        params,
-      }
-    );
+    return http.get<ApiResponse<PersonStatisticsData>>('/statistics/by-person', {
+      params,
+    });
   },
 
   // 按月份统计
@@ -227,25 +223,6 @@ export const api = {
 
 // ============== 类型定义 ==============
 // 根据后端 API 文档的响应格式
-export interface LoginResponse {
-  success: boolean;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role: 'husband' | 'wife';
-      coupleId?: string;
-      createdAt: string;
-      updatedAt: string;
-    };
-  };
-  message: string;
-  timestamp: number;
-}
-
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -258,6 +235,7 @@ export interface CoupleMember {
   name: string;
   email: string;
   role: 'husband' | 'wife';
+  createdAt?: string;
 }
 
 export interface CoupleInfo {
@@ -266,24 +244,9 @@ export interface CoupleInfo {
   husband?: CoupleMember;
   wife?: CoupleMember;
   members?: CoupleMember[];
+  users?: CoupleMember[];
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface RegisterResponse {
-  success: boolean;
-  data: {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role: 'husband' | 'wife';
-    };
-    accessToken: string;
-    refreshToken: string;
-  };
-  message: string;
-  timestamp: number;
 }
 
 export interface UserInfo {
@@ -295,6 +258,37 @@ export interface UserInfo {
   avatar?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    user: UserInfo;
+  };
+  message: string;
+  timestamp: number;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: 'husband' | 'wife';
+      createdAt?: string;
+      updatedAt?: string;
+      coupleId?: string;
+      avatar?: string;
+    };
+    accessToken: string;
+    refreshToken: string;
+  };
+  message: string;
+  timestamp: number;
 }
 
 export type RecordCategory =

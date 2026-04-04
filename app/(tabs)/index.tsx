@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   },
   recentRecordsContainer: {
     flex: 1,
-    padding: 20,
+    padding: 16,
   },
   recentRecordsTitle: {
     fontSize: 18,
