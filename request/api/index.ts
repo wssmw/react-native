@@ -71,6 +71,23 @@ export const recordApi = {
     });
   },
 
+  // 获取按日期分组的记账明细 - GET /api/records/grouped-by-date
+  getGroupedByDate: (params?: {
+    page?: number;
+    limit?: number;
+    type?: 'income' | 'expense' | '';
+    person?: 'husband' | 'wife';
+    start_date?: string;
+    end_date?: string;
+  }) => {
+    return http.get<ApiResponse<GroupedRecordListResponse>>(
+      '/records/grouped-by-date',
+      {
+        params,
+      }
+    );
+  },
+
   // 获取单条记录 - GET /api/records/:id
   getRecordDetail: (id: string) => {
     return http.get<ApiResponse<RecordItem>>(`/records/${id}`);
@@ -154,9 +171,12 @@ export const categoryApi = {
 export const statisticsApi = {
   // 获取首页概览
   getHomeOverview: (params?: { limit?: number }) => {
-    return http.get<ApiResponse<HomeOverviewData>>('/statistics/home-overview', {
-      params,
-    });
+    return http.get<ApiResponse<HomeOverviewData>>(
+      '/statistics/home-overview',
+      {
+        params,
+      }
+    );
   },
 
   // 获取汇总统计
@@ -176,16 +196,22 @@ export const statisticsApi = {
 
   // 按人员统计
   getByPerson: (params: { start_date: string; end_date: string }) => {
-    return http.get<ApiResponse<PersonStatisticsData>>('/statistics/by-person', {
-      params,
-    });
+    return http.get<ApiResponse<PersonStatisticsData>>(
+      '/statistics/by-person',
+      {
+        params,
+      }
+    );
   },
 
   // 按月份统计
   getByMonth: (params: { year: number }) => {
-    return http.get<ApiResponse<MonthStatisticsItem[]>>('/statistics/by-month', {
-      params,
-    });
+    return http.get<ApiResponse<MonthStatisticsItem[]>>(
+      '/statistics/by-month',
+      {
+        params,
+      }
+    );
   },
 };
 
@@ -376,6 +402,26 @@ export interface HomeOverviewData {
   totalExpense: number;
   balance: number;
   recentRecords: RecordItem[];
+}
+
+export interface GroupedRecordItem {
+  date: string;
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  records: RecordItem[];
+}
+
+export interface GroupedRecordPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface GroupedRecordListResponse {
+  list: GroupedRecordItem[];
+  pagination: GroupedRecordPagination;
 }
 
 export interface CategoryStatisticsItem {

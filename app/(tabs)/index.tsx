@@ -29,6 +29,21 @@ const categoryLabelMap: Record<string, string> = {
   other_income: '其他收入',
 };
 
+const categoryIconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
+  food: 'restaurant',
+  transport: 'directions-car',
+  shopping: 'shopping-bag',
+  entertainment: 'sports-esports',
+  house: 'home',
+  medical: 'local-hospital',
+  education: 'school',
+  other_expense: 'more-horiz',
+  salary: 'account-balance-wallet',
+  bonus: 'card-giftcard',
+  investment: 'trending-up',
+  other_income: 'more-horiz',
+};
+
 const personLabelMap: Record<'husband' | 'wife', string> = {
   husband: '丈夫',
   wife: '妻子',
@@ -54,6 +69,10 @@ function formatRecordDate(date: string) {
 
 function getRecordCategoryLabel(category: string) {
   return categoryLabelMap[category] || category;
+}
+
+function getRecordCategoryIcon(category: string) {
+  return categoryIconMap[category] || 'receipt-long';
 }
 
 function getRecordSign(type: RecordItem['type']) {
@@ -166,9 +185,11 @@ export default function HomeScreen() {
         {overview.recentRecords.map(item => (
           <ThemedView style={styles.recordItem} key={item.id}>
             <View style={styles.recordIconBox}>
-              <ThemedText style={styles.recordIconText}>
-                {item.type === 'income' ? '入' : '支'}
-              </ThemedText>
+              <MaterialIcons
+                name={getRecordCategoryIcon(item.category)}
+                size={22}
+                color="#1d4ed8"
+              />
             </View>
 
             <ThemedView style={styles.recordContent}>
@@ -315,10 +336,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
-  },
-  recordIconText: {
-    color: '#1d4ed8',
-    fontWeight: '700',
   },
   recordContent: {
     flex: 1,

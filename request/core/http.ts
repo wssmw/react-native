@@ -72,7 +72,8 @@ export class Request {
         requestId
       );
 
-      const processedResponse = await this.executeResponseInterceptors(response);
+      const processedResponse =
+        await this.executeResponseInterceptors(response);
       this.abortControllers.delete(requestId);
 
       if (!processedResponse.success) {
@@ -303,6 +304,7 @@ export class Request {
         headers['Authorization'] =
           `${tokens.tokenType || 'Bearer'} ${tokens.accessToken}`;
       }
+      console.log(headers.Authorization, 'tokens');
     }
 
     return headers;
